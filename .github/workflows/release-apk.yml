@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to tag and release (e.g. 1.0.0). Only used when run manually."
+        required: true
+        type: string
 
 jobs:
   build-and-release:
@@ -13,6 +18,23 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+
+      # Manual runs don't start from a tag push, so create one here using the
+      # workflow's own GitHub credentials.
+      - name: Determine release tag
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            tag="v${{ inputs.version }}"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "$tag" -m "Paperwork $tag"
+            git push origin "$tag"
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-java@v4
         with:
@@ -52,11 +74,11 @@ jobs:
       - name: Rename APK
         working-directory: budget
         run: |
-          version="${GITHUB_REF_NAME#v}"
           mkdir -p ../dist
-          cp build/app/outputs/flutter-apk/app-release.apk "../dist/paperwork-${version}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "../dist/paperwork-${{ steps.vars.outputs.version }}.apk"
 
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.vars.outputs.tag }}
           files: dist/*.apk
           generate_release_notes: true
