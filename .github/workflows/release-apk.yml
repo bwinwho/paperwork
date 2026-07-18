@@ -1,0 +1,62 @@
+name: Build and release APK
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Install dependencies
+        working-directory: budget
+        run: flutter pub get
+
+      # No signing keystore is committed to the repo yet, so the release build type has
+      # no signing config to use. Generate a throwaway one so `flutter build apk --release`
+      # produces an installable (self-signed, not Play Store-ready) APK. Replace this with a
+      # persisted keystore + GitHub secrets before shipping to an app store.
+      - name: Generate a temporary release keystore
+        working-directory: budget/android
+        run: |
+          keytool -genkeypair -v -keystore app/release.keystore.jks -storetype JKS \
+            -keyalg RSA -keysize 2048 -validity 10000 -alias paperwork \
+            -storepass paperwork123 -keypass paperwork123 \
+            -dname "CN=Paperwork, OU=Paperwork, O=Paperwork, L=Unknown, ST=Unknown, C=US"
+          cat > key.properties <<EOF
+          storePassword=paperwork123
+          keyPassword=paperwork123
+          keyAlias=paperwork
+          storeFile=release.keystore.jks
+          EOF
+
+      - name: Build release APK
+        working-directory: budget
+        run: flutter build apk --release
+
+      - name: Rename APK
+        working-directory: budget
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          mkdir -p ../dist
+          cp build/app/outputs/flutter-apk/app-release.apk "../dist/paperwork-${version}.apk"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.apk
+          generate_release_notes: true

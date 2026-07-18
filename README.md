@@ -1,15 +1,22 @@
-<h1 align="center" style="font-size:28px; line-height:1"><b>Cashew</b></h1>
+<h1 align="center" style="font-size:28px; line-height:1"><b>Paperwork</b></h1>
 
 > ### Fork Notice
 >
-> This repository is a fork of **[Cashew](https://github.com/jameskokoska/Cashew)** by
+> **Paperwork** is a fork of **[Cashew](https://github.com/jameskokoska/Cashew)** by
 > **[James Kokoska](https://github.com/jameskokoska)**, imported here as the starting point
-> for further development and customization. All original design, features, and code below
-> are the work of the upstream author and contributors — full credit to them.
+> for further development and customization. Most of the design, features, and code below
+> are the work of the upstream author and contributors — full credit to them. Changes made
+> in this fork (currency defaults, theme, navigation, branding, etc.) are documented in
+> [`CHANGELOG.md`](CHANGELOG.md) and the commit history.
 >
 > This project remains licensed under the **GNU GPLv3** (see [`LICENSE`](LICENSE)), the same
-> license as the upstream project, and any modifications made in this fork are documented
-> through the commit history.
+> license as the upstream project.
+
+## Releases
+
+Download the latest APK from the [Releases page](../../releases/latest). Release APKs are
+built and attached automatically by [`.github/workflows/release-apk.yml`](.github/workflows/release-apk.yml)
+whenever a `v*` tag is pushed. See [`CHANGELOG.md`](CHANGELOG.md) for what's new in each version.
 
 <div align="center">
   <a href="https://cashewapp.web.app/">
@@ -108,7 +115,10 @@ Cashew is a full-fledged, feature-rich application designed to empower users in 
   Cashew was featured in the <a href="https://github.com/nyas1/Material-You-app-list?tab=readme-ov-file#-economy:~:text=MDY%20Celenganku-,MDY%20Cashew,-MDY%20Allowance%20FOSS">Material You Apps List</a>!
 </p>
 
-## Release
+## Upstream Release (Cashew)
+
+The following section describes the **upstream Cashew project**, not this fork - see
+[Releases](#releases) above for Paperwork's own builds.
 
 Check out the [official website](https://cashewapp.web.app/)!
 
