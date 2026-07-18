@@ -35,16 +35,27 @@ double getWidthNavigationSidebar(BuildContext context) {
       MediaQuery.viewPaddingOf(context).left;
 }
 
+// The floating pill-shaped bottom nav bar sits above the screen edge
+// instead of docking flush against it - this is the gap below it.
+double getFloatingNavBarBottomMargin(context) {
+  double safeAreaBottom = MediaQuery.viewPaddingOf(context).bottom;
+  return safeAreaBottom > 0 ? safeAreaBottom + 6 : 16;
+}
+
+// iOS's NavBarIcon renders a 52px circle with 5px margin on each side (62px),
+// so the bar needs to be at least that tall.
+const double floatingNavBarHeightIOS = 66;
+const double floatingNavBarHeightAndroid = 68;
+
 double getHeightNavigationSidebar(context) {
   if (getIsFullScreen(context)) {
     // No navbar in full screen
     return 0;
   } else {
-    if (getPlatform() == PlatformOS.isIOS) {
-      return 70 + MediaQuery.viewPaddingOf(context).bottom;
-    } else {
-      return 80 + MediaQuery.viewPaddingOf(context).bottom;
-    }
+    double barHeight = getPlatform() == PlatformOS.isIOS
+        ? floatingNavBarHeightIOS
+        : floatingNavBarHeightAndroid;
+    return barHeight + getFloatingNavBarBottomMargin(context);
   }
 }
 

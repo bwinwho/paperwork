@@ -21,7 +21,7 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "syncEveryChange": kIsWeb,
     "devicesHaveBeenSynced": 1,
     "numBackups": 1,
-    "theme": "system", //system, light, dark
+    "theme": "dark", //system, light, dark
     "use24HourFormat": "system", //system, 12-hour, 24-hour
     "numberCountUpAnimation": true,
     "appAnimations": AppAnimations.all.index,
@@ -29,7 +29,9 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "showExtraInfoText": true,
     "selectedWalletPk": "0",
     "selectedSubscriptionType": 0,
-    "accentColor": toHexString(Color(0xFF1B447A)),
+    // Our app uses a black and white look, so seed the Material scheme
+    // with black instead of upstream Cashew's blue.
+    "accentColor": toHexString(Color(0xFF000000)),
     "accentSystemColor": await systemColorByDefault(),
     "widgetOpacity": 1,
     "widgetTheme": "system", //system, light, dark
@@ -47,11 +49,11 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "showWalletSwitcherFullScreen": true,
     "showWalletList": false,
     "showWalletListFullScreen": false,
-    "showPinnedBudgets": true,
+    "showPinnedBudgets": false,
     "showPinnedBudgetsFullScreen": true,
     "showObjectives": false,
     "showObjectivesFullScreen": true,
-    "showAllSpendingSummary": false,
+    "showAllSpendingSummary": true,
     "showAllSpendingSummaryFullScreen": false,
     "showNetWorth": false,
     "showNetWorthFullScreen": false,
@@ -152,7 +154,9 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "notificationsReminderType": ReminderNotificationType.IfAppNotOpened.index,
     "appOpenedHour": DateTime.now().hour,
     "appOpenedMinute": DateTime.now().minute,
-    "materialYou": supportsSystemColor(),
+    // Default off so the system's colorful dynamic color doesn't override
+    // our black and white theme.
+    "materialYou": false,
     "colorTintCategoryIcon": false,
     "sendTransactionsToServerQueue": {},
     "currentUserEmail": "",

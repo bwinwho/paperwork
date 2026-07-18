@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/editBudgetPage.dart';
 import 'package:budget/pages/editHomePage.dart';
@@ -14,6 +13,7 @@ import 'package:budget/widgets/navigationFramework.dart';
 import 'package:budget/widgets/openBottomSheet.dart';
 import 'package:budget/widgets/outlinedButtonStacked.dart';
 import 'package:budget/widgets/framework/navigation_bar/navigation_bar.dart';
+import 'package:budget/widgets/navigationSidebar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart'
     hide NavigationDestination, NavigationBar;
@@ -112,8 +112,10 @@ class BottomNavBarState extends State<BottomNavBar> {
         widget.currentNavigationStackedIndex);
 
     if (getIsFullScreen(context)) return SizedBox.shrink();
+    Widget navBarContent;
     if (getPlatform() == PlatformOS.isIOS) {
-      return IntrinsicHeight(
+      navBarContent = SizedBox(
+        height: floatingNavBarHeightIOS,
         child: Container(
           decoration: BoxDecoration(
             color: getBottomNavbarBackgroundColor(
@@ -121,11 +123,7 @@ class BottomNavBarState extends State<BottomNavBar> {
               brightness: Theme.of(context).brightness,
               lightDarkAccent: getColor(context, "lightDarkAccent"),
             ),
-            boxShadow: boxShadowSharp(context),
           ),
-          padding: EdgeInsetsDirectional.only(
-              top: 2,
-              bottom: max(2, MediaQuery.paddingOf(context).bottom - 5.5)),
           child: Row(
             children: [
               NavBarSpaceButton(
@@ -209,105 +207,109 @@ class BottomNavBarState extends State<BottomNavBar> {
           ),
         ),
       );
-    }
-    // Android navbar
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: boxShadowSharp(context),
-      ),
-      child: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          backgroundColor: getBottomNavbarBackgroundColor(
-            colorScheme: Theme.of(context).colorScheme,
-            brightness: Theme.of(context).brightness,
-            lightDarkAccent: getColor(context, "lightDarkAccent"),
+    } else {
+      // Android navbar
+      navBarContent = SizedBox(
+        height: floatingNavBarHeightAndroid,
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            backgroundColor: getBottomNavbarBackgroundColor(
+              colorScheme: Theme.of(context).colorScheme,
+              brightness: Theme.of(context).brightness,
+              lightDarkAccent: getColor(context, "lightDarkAccent"),
+            ),
+            surfaceTintColor: Colors.transparent,
+            indicatorColor: appStateSettings["materialYou"]
+                ? dynamicPastel(context, Theme.of(context).colorScheme.primary,
+                    amount: 0.6)
+                : null,
+            // Pill nav bar is icon-only, so labels are always hidden
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
           ),
-          surfaceTintColor: Colors.transparent,
-          indicatorColor: appStateSettings["materialYou"]
-              ? dynamicPastel(context, Theme.of(context).colorScheme.primary,
-                  amount: 0.6)
-              : null,
-          labelTextStyle: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
-              return TextStyle(
-                fontFamily: appStateSettings["font"],
-                fontFamilyFallback: ['Inter'],
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                overflow: TextOverflow.clip,
-              );
-            } else {
-              return TextStyle(
-                fontFamily: appStateSettings["font"],
-                fontFamilyFallback: ['Inter'],
-                fontSize: 13,
-                overflow: TextOverflow.clip,
-              );
-            }
-          }),
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          child: NavigationBar(
+            animationDuration: Duration(milliseconds: 1000),
+            destinations: [
+              CustomizableNavigationBarIcon(
+                shortcutAppSettingKey: "customNavBarShortcut0",
+                afterSet: () {
+                  onItemTapped(0, allowReApply: true);
+                },
+                navigationBarIconBuilder: (NavBarIconData iconData) {
+                  return NavigationDestination(
+                    icon: Icon(iconData.iconData, size: iconData.iconSize),
+                    label: iconData.label.tr().length > 15 &&
+                            iconData.labelShort != null
+                        ? (iconData.labelShort ?? "").tr()
+                        : iconData.label.tr(),
+                    tooltip: "",
+                  );
+                },
+              ),
+              CustomizableNavigationBarIcon(
+                shortcutAppSettingKey: "customNavBarShortcut1",
+                afterSet: () {
+                  onItemTapped(1, allowReApply: true);
+                },
+                navigationBarIconBuilder: (NavBarIconData iconData) {
+                  return NavigationDestination(
+                    icon: Icon(iconData.iconData, size: iconData.iconSize),
+                    label: iconData.label.tr().length > 15 &&
+                            iconData.labelShort != null
+                        ? (iconData.labelShort ?? "").tr()
+                        : iconData.label.tr(),
+                    tooltip: "",
+                  );
+                },
+              ),
+              CustomizableNavigationBarIcon(
+                shortcutAppSettingKey: "customNavBarShortcut2",
+                afterSet: () {
+                  onItemTapped(2, allowReApply: true);
+                },
+                navigationBarIconBuilder: (NavBarIconData iconData) {
+                  return NavigationDestination(
+                    icon: Icon(iconData.iconData, size: iconData.iconSize),
+                    label: iconData.label.tr().length > 15 &&
+                            iconData.labelShort != null
+                        ? (iconData.labelShort ?? "").tr()
+                        : iconData.label.tr(),
+                    tooltip: "",
+                  );
+                },
+              ),
+              NavigationDestination(
+                icon: Icon(navBarIconsData["more"]!.iconData),
+                label: navBarIconsData["more"]!.label.tr(),
+                tooltip: "",
+              ),
+            ],
+            selectedIndex: navigationBarIndex,
+            onDestinationSelected: (value) {
+              onItemTapped(value);
+            },
+          ),
         ),
-        child: NavigationBar(
-          animationDuration: Duration(milliseconds: 1000),
-          destinations: [
-            CustomizableNavigationBarIcon(
-              shortcutAppSettingKey: "customNavBarShortcut0",
-              afterSet: () {
-                onItemTapped(0, allowReApply: true);
-              },
-              navigationBarIconBuilder: (NavBarIconData iconData) {
-                return NavigationDestination(
-                  icon: Icon(iconData.iconData, size: iconData.iconSize),
-                  label: iconData.label.tr().length > 15 &&
-                          iconData.labelShort != null
-                      ? (iconData.labelShort ?? "").tr()
-                      : iconData.label.tr(),
-                  tooltip: "",
-                );
-              },
-            ),
-            CustomizableNavigationBarIcon(
-              shortcutAppSettingKey: "customNavBarShortcut1",
-              afterSet: () {
-                onItemTapped(1, allowReApply: true);
-              },
-              navigationBarIconBuilder: (NavBarIconData iconData) {
-                return NavigationDestination(
-                  icon: Icon(iconData.iconData, size: iconData.iconSize),
-                  label: iconData.label.tr().length > 15 &&
-                          iconData.labelShort != null
-                      ? (iconData.labelShort ?? "").tr()
-                      : iconData.label.tr(),
-                  tooltip: "",
-                );
-              },
-            ),
-            CustomizableNavigationBarIcon(
-              shortcutAppSettingKey: "customNavBarShortcut2",
-              afterSet: () {
-                onItemTapped(2, allowReApply: true);
-              },
-              navigationBarIconBuilder: (NavBarIconData iconData) {
-                return NavigationDestination(
-                  icon: Icon(iconData.iconData, size: iconData.iconSize),
-                  label: iconData.label.tr().length > 15 &&
-                          iconData.labelShort != null
-                      ? (iconData.labelShort ?? "").tr()
-                      : iconData.label.tr(),
-                  tooltip: "",
-                );
-              },
-            ),
-            NavigationDestination(
-              icon: Icon(navBarIconsData["more"]!.iconData),
-              label: navBarIconsData["more"]!.label.tr(),
-              tooltip: "",
-            ),
-          ],
-          selectedIndex: navigationBarIndex,
-          onDestinationSelected: (value) {
-            onItemTapped(value);
-          },
+      );
+    }
+
+    double barHeight = getPlatform() == PlatformOS.isIOS
+        ? floatingNavBarHeightIOS
+        : floatingNavBarHeightAndroid;
+    return Padding(
+      padding: EdgeInsetsDirectional.only(
+        start: 16,
+        end: 16,
+        bottom: getFloatingNavBarBottomMargin(context),
+      ),
+      child: Container(
+        height: barHeight,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(barHeight / 2),
+          boxShadow: boxShadowCheck(boxShadowGeneral(context)),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(barHeight / 2),
+          child: navBarContent,
         ),
       ),
     );
