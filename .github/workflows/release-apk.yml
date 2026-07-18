@@ -28,8 +28,8 @@ jobs:
             tag="v${{ inputs.version }}"
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git tag -a "$tag" -m "Paperwork $tag"
-            git push origin "$tag"
+            git tag -fa "$tag" -m "Paperwork $tag"
+            git push --force origin "refs/tags/$tag"
           else
             tag="${GITHUB_REF_NAME}"
           fi
@@ -41,9 +41,13 @@ jobs:
           distribution: "zulu"
           java-version: "17"
 
+      # Pinned rather than "channel: stable" because the pubspec pins intl ^0.18.1
+      # (via easy_localization), which only resolves against the flutter_localizations
+      # bundled up through Flutter 3.19.x - newer Flutter bundles intl 0.19+/0.20+ and
+      # fails dependency resolution (confirmed against flutter/flutter's tagged history).
       - uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
+          flutter-version: "3.19.6"
 
       - name: Install dependencies
         working-directory: budget
