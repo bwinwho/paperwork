@@ -25,6 +25,25 @@ rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
     project.evaluationDependsOn(':app')
+
+    // Many of this project's plugin dependencies predate AGP 8, which removed the
+    // fallback of inferring a module's namespace from its AndroidManifest.xml
+    // package attribute. Rather than patching each plugin's build.gradle (they're
+    // not vendored in this repo), backfill the namespace here for any Android
+    // module that doesn't declare one, the same way the manifest attribute used to.
+    afterEvaluate { proj ->
+        def androidExt = proj.extensions.findByName('android')
+        if (androidExt != null && androidExt.hasProperty('namespace') && androidExt.namespace == null) {
+            def manifestFile = proj.file('src/main/AndroidManifest.xml')
+            if (manifestFile.exists()) {
+                def manifestXml = new groovy.xml.XmlSlurper().parse(manifestFile)
+                def packageName = manifestXml.@package.text()
+                if (packageName) {
+                    androidExt.namespace = packageName
+                }
+            }
+        }
+    }
 }
 
 tasks.register("clean", Delete) {
